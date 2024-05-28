@@ -54,7 +54,7 @@ class LoanDetailsController extends Controller
         DB::statement('DROP TABLE IF EXISTS emi_details');
 
         // Create the emi_details table with dynamic columns
-        $columnsSql = implode(' INT, ', $columns) . ' INT';
+        $columnsSql = implode(' FLOAT, ', $columns) . ' FLOAT';
         $createTableSql = "
             CREATE TABLE emi_details (
                 clientid INT PRIMARY KEY,
@@ -76,12 +76,11 @@ class LoanDetailsController extends Controller
             $endDate = new \DateTime($loan->last_payment_date);
 
             $emiDetails = array_fill_keys($columns, 0.00);
-            $currentDate = clone $startDate;
 
             for ($i = 0; $i < $loan->num_of_payment; $i++) {
-                $monthColumn = $currentDate->format('Y_M');
+                $monthColumn = $startDate->format('Y_M');
                 $emiDetails[$monthColumn] = round($emiAmount, 2);
-                $currentDate->modify('+1 month');
+                $startDate->modify('first day of next month');
             }
 
             $lastMonthColumn = $endDate->format('Y_M');
